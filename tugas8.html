@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<script>
+		function guess(){
+			var randomNumber = Math.floor(Math.random() *100);
+			var x = 0;
+			while(x < 3){
+				var guessNumber = parseFloat(prompt("Guess my fave number: (between 0 until 99)"));
+				x ++;
+				if(guessNumber === randomNumber){
+					document.write("Congrats you know my favorite number is " + randomNumber);
+					return;
+				}
+				else if(guessNumber < randomNumber){
+					alert("Too low! your attempts is : " + x);
+				}
+				else if(guessNumber > randomNumber){
+					alert("Too High! Your attempts is : " + x);
+				}
+				if(x === 3){
+					alert("No more attempts left! The number was : " + randomNumber);
+				}
+			}
+		}
+		guess();
+		</script>
+	</body>
+</html>
