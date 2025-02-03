@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Online Sederhana</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px;
+        }
+
+        .product-card {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            padding: 15px;
+            width: 200px;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .product-card img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .product-card h3 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .product-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .product-card .price {
+            font-size: 16px;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .product-card .quantity {
+            margin: 10px 0;
+        }
+
+        .product-card .total-price {
+            font-size: 16px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .total-container {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .checkout-button {
+            background-color: #25d366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        .checkout-button:hover {
+            background-color: #128c7e;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Toko Online Aksesoris</h1>
+</header>
+
+<div class="container" id="product-container">
+    <!-- Produk akan ditampilkan di sini -->
+</div>
+
+<div class="total-container">
+    <p>Total Belanja: <span id="total-bill">$ 0</span></p>
+    <a id="checkout-btn" class="checkout-button" href="#" target="_blank">Checkout</a>
+</div>
+
+<footer>
+    <p>&copy; 2025 Toko Online Sederhana</p>
+</footer>
+
+<script>
+// Nilai tukar dari IDR ke USD (Misalnya 1 USD = 15,000 IDR)
+const exchangeRate = 15000;
+
+function fetchProducts() {
+    fetch('https://678a5b1fdd587da7ac29cb82.mockapi.io/product/aksesoris')
+        .then(response => response.json())
+        .then(data => {
+            const productContainer = document.getElementById('product-container');
+            let totalBill = 0;
+
+            data.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.classList.add('product-card');
+                
+                // Mengonversi harga dari IDR ke USD
+                const priceInUSD = (product.harga / exchangeRate).toFixed(2); // Mengonversi ke USD dan membatasi 2 desimal
+                
+                // Membuat elemen untuk produk
+                productCard.innerHTML = `
+                    <img src="${product.gambar}" alt="${product.nama}">
+                    <h3>${product.nama}</h3>
+                    <div class="price">$ ${priceInUSD}</div>
+                    <div class="quantity">
+                        <label for="quantity-${product.id}">Jumlah:</label>
+                        <input type="number" id="quantity-${product.id}" value="0" min="0" data-price="${priceInUSD}" data-id="${product.id}">
+                    </div>
+                    <div class="total-price" id="total-price-${product.id}">$ ${priceInUSD}</div>
+                `;
+
+                // Menambahkan event listener untuk input jumlah barang
+                const quantityInput = productCard.querySelector(`#quantity-${product.id}`);
+                const totalPriceElement = productCard.querySelector(`#total-price-${product.id}`);
+                quantityInput.addEventListener('input', function () {
+                    const quantity = parseInt(quantityInput.value);
+                    const price = parseFloat(quantityInput.getAttribute('data-price'));
+                    const totalPrice = (quantity * price).toFixed(2); // Total harga dalam USD
+                    totalPriceElement.textContent = `$ ${totalPrice}`;
+                    updateTotalBill();
+                });
+
+                productContainer.appendChild(productCard);
+            });
+
+            // Fungsi untuk menghitung total tagihan
+            function updateTotalBill() {
+                let total = 0;
+                let checkoutMessage = "Pesanan Saya:\n";
+
+                data.forEach(product => {
+                    const quantity = parseInt(document.getElementById(`quantity-${product.id}`).value);
+                    const price = parseFloat(product.harga / exchangeRate); // Mengonversi harga ke USD
+                    total += quantity * price;
+                    checkoutMessage += `${product.nama} (x${quantity}) - $ ${(quantity * price).toFixed(2)}\n`;
+                });
+
+                document.getElementById('total-bill').textContent = `$ ${total.toFixed(2)}`;
+
+                // Update tombol checkout dengan pesan ke WhatsApp
+                const checkoutButton = document.getElementById('checkout-btn');
+                const whatsappLink = `https://wa.me/62882016238202?text=${encodeURIComponent(checkoutMessage + "\nTotal: $ " + total.toFixed(2))}`;
+                checkoutButton.setAttribute('href', whatsappLink);
+            }
+        })
+        .catch(error => {
+            console.error('Terjadi kesalahan:', error);
+        });
+}
+
+// Memanggil fungsi untuk menampilkan produk saat halaman dimuat
+document.addEventListener('DOMContentLoaded', fetchProducts);
+</script>
+
+</body>
+</html>
